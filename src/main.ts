@@ -18,7 +18,7 @@ app.innerHTML = `
   </div>
   <div class="attribution">
     Challenge by <a href="https://www.frontendmentor.io?ref=challenge">Frontend Mentor</a>. 
-    Coded by <a href="https://github.com/Simon-Njoroge/product-list-with-cart-main.git">Simon Njoroge</a>.
+    Coded by <a href="https://github.com/tmothykhalayi/Week-2-Friday-assignment-.git">Timothy Khalayi</a>.
   </div>
 `;
 
