@@ -2,6 +2,7 @@ import './style.css';
 import { CartDB } from './cartdb';
 import type { Dessert } from './cartdb';
 import remove from '../assets/images/icon-remove-item.svg';
+
 const cartDB = new CartDB();
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -12,7 +13,7 @@ app.innerHTML = `
     <div class="maincart" id="main-cart">
       <div class="cart-info">Your Cart (<span id="cart-count">0</span>)</div>
       <div class="cart-items">Your added items will appear here</div>
-      <div class="cart-total">order Total: $<span id="order-total">0.00</span></div>
+      <div class="cart-total">Order Total: $<span id="order-total">0.00</span></div>
       <button id="confirm-order">Confirm Order</button>
     </div>
   </div>
@@ -28,9 +29,13 @@ const cartItems = document.querySelector<HTMLDivElement>('.cart-items')!;
 const orderTotal = document.querySelector<HTMLSpanElement>('#order-total')!;
 const confirmOrderBtn = document.querySelector<HTMLButtonElement>('#confirm-order')!;
 
+/**
+ * Update the cart UI with the latest items and total price.
+ * @param items - The list of items in the cart.
+ */
 function updateCartUI(items: Dessert[]) {
   cartCount.textContent = items.length.toString();
-  cartItems.innerHTML = '';
+  cartItems.innerHTML = '';  // Clear current cart items.
   let total = 0;
 
   items.forEach((item) => {
@@ -39,21 +44,7 @@ function updateCartUI(items: Dessert[]) {
     const p = document.createElement('p');
     p.textContent = `${item.name} - $${item.price.toFixed(2)}`;
     
-    const delBtn = document.createElement('button');
-    const trashIcon = document.createElement('img');
-    trashIcon.src = remove;
-    trashIcon.alt = 'Remove from cart';
-    trashIcon.width = 20;
-    trashIcon.height = 20;
-
-    delBtn.appendChild(trashIcon);
-    delBtn.style.marginLeft = '10px';
-
-    delBtn.onclick = async () => {
-      await cartDB.removeItem(item.name);
-      const updated = await cartDB.getAllItems();
-      updateCartUI(updated);
-    };
+    const delBtn = createDeleteButton(item);
 
     p.appendChild(delBtn);
     cartItems.appendChild(p);
@@ -62,7 +53,33 @@ function updateCartUI(items: Dessert[]) {
   orderTotal.textContent = total.toFixed(2);
 }
 
-confirmOrderBtn.addEventListener('click', async () => {
+function createDeleteButton(item: Dessert): HTMLButtonElement {
+  const delBtn = document.createElement('button');
+  const trashIcon = document.createElement('img');
+  trashIcon.src = remove;
+  trashIcon.alt = 'Remove from cart';
+  trashIcon.width = 20;
+  trashIcon.height = 20;
+
+  delBtn.appendChild(trashIcon);
+  delBtn.style.marginLeft = '10px';
+
+  delBtn.onclick = async () => {
+    await removeItemFromCart(item.name);
+    const updated = await cartDB.getAllItems();
+    updateCartUI(updated);
+  };
+
+  return delBtn;
+}
+
+
+async function removeItemFromCart(itemName: string) {
+  await cartDB.removeItem(itemName);
+}
+
+//handles confirmation of the order
+async function confirmOrderHandler() {
   const items = await cartDB.getAllItems();
   if (items.length === 0) {
     alert("Your cart is empty!");
@@ -73,16 +90,29 @@ confirmOrderBtn.addEventListener('click', async () => {
   const updated = await cartDB.getAllItems();
   updateCartUI(updated);
   alert("Thank you for your order!");
-});
+}
+
+//json fetch function to get dessert data
+async function fetchDessertData(): Promise<Dessert[]> {
+  const res = await fetch('/data.json');
+  if (!res.ok) {
+    console.error('Failed to fetch dessert data');
+    return [];
+  }
+  return await res.json();
+}
 
 async function init() {
   const cart = await cartDB.getAllItems();
   updateCartUI(cart);
 
-  const res = await fetch('/data.json');
-  const data: Dessert[] = await res.json();
+  const desserts = await fetchDessertData();
+  renderDessertItems(desserts);
+}
 
-  data.forEach((item) => {
+//displays items on ui
+function renderDessertItems(desserts: Dessert[]) {
+  desserts.forEach((item) => {
     const div = document.createElement('div');
     div.className = 'item';
     div.innerHTML = `
@@ -90,8 +120,10 @@ async function init() {
       <p class="category">${item.category}</p>
       <p class="itemtitle">${item.name}</p>
       <p class="price">$${item.price.toFixed(2)}</p>
-      <button class="addcart"><span><img src="../assets/images/icon-add-to-cart.svg"/>
-      Add to Cart</button>
+      <button class="addcart">
+        <span><img src="../assets/images/icon-add-to-cart.svg" alt="Add to cart" /></span>
+        Add to Cart
+      </button>
     `;
 
     const btn = div.querySelector<HTMLButtonElement>('.addcart')!;
@@ -105,4 +137,7 @@ async function init() {
   });
 }
 
+confirmOrderBtn.addEventListener('click', confirmOrderHandler);
+
+// Initialize the app
 init();
