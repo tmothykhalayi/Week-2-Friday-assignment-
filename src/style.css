@@ -1,8 +1,3 @@
-*{
-  margin: 0%;
-  padding: 0%;
-  box-sizing: border-box;
-}
 
 body {
    margin: 0%;
@@ -14,6 +9,12 @@ body {
   flex-direction: column;
   margin: 2rem 2.5rem;
 }
+*{
+  margin: 0%;
+  padding: 0%;
+  box-sizing: border-box;
+}
+
 
 .heading {
   font-size: 2.5em;
