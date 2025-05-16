@@ -1,9 +1,9 @@
 import './style.css';
-import { CartDB } from './cartdb';
-import type { Dessert } from './cartdb';
+import { functionalityDB} from './functionalityDB';
+import type { Dessert } from './functionalityDB';
 import remove from '../assets/images/icon-remove-item.svg';
 
-const cartDB = new CartDB();
+const FunctionalityDB = new functionalityDB();
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML = `
@@ -66,7 +66,7 @@ function createDeleteButton(item: Dessert): HTMLButtonElement {
 
   delBtn.onclick = async () => {
     await removeItemFromCart(item.name);
-    const updated = await cartDB.getAllItems();
+    const updated = await FunctionalityDB.getAllItems();
     updateCartUI(updated);
   };
 
@@ -75,19 +75,19 @@ function createDeleteButton(item: Dessert): HTMLButtonElement {
 
 
 async function removeItemFromCart(itemName: string) {
-  await cartDB.removeItem(itemName);
+  await FunctionalityDB.removeItem(itemName);
 }
 
 //handles confirmation of the order
 async function confirmOrderHandler() {
-  const items = await cartDB.getAllItems();
+  const items = await FunctionalityDB.getAllItems();
   if (items.length === 0) {
     alert("Your cart is empty!");
     return;
   }
 
-  await cartDB.clearCart();
-  const updated = await cartDB.getAllItems();
+  await FunctionalityDB.clearCart();
+  const updated = await FunctionalityDB.getAllItems();
   updateCartUI(updated);
   alert("Thank you for your order!");
 }
@@ -103,14 +103,14 @@ async function fetchDessertData(): Promise<Dessert[]> {
 }
 
 async function init() {
-  const cart = await cartDB.getAllItems();
+  const cart = await FunctionalityDB.getAllItems();
   updateCartUI(cart);
 
   const desserts = await fetchDessertData();
   renderDessertItems(desserts);
 }
 
-//displays items on ui
+//displays items
 function renderDessertItems(desserts: Dessert[]) {
   desserts.forEach((item) => {
     const div = document.createElement('div');
@@ -128,8 +128,8 @@ function renderDessertItems(desserts: Dessert[]) {
 
     const btn = div.querySelector<HTMLButtonElement>('.addcart')!;
     btn.addEventListener('click', async () => {
-      await cartDB.addItem(item);
-      const updated = await cartDB.getAllItems();
+      await FunctionalityDB.addItem(item);
+      const updated = await FunctionalityDB.getAllItems();
       updateCartUI(updated);
     });
 

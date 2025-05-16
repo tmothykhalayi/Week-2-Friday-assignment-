@@ -4,15 +4,16 @@ export type Dessert = {
   category: string;
   price: number;
   image: {
-    thumbnail: string;
-    mobile: string;
+    
     tablet: string;
     desktop: string;
+    thumbnail: string;
+    mobile: string;
   };
 };
 
-export class CartDB {
-  private dbName = 'DessertCartDB';
+export class functionalityDB {
+  private dbName = 'functionalityDB';
   private storeName = 'cart';
 
   openDB(): Promise<IDBDatabase> {
